@@ -11,6 +11,7 @@
 # You can then use a tool like Postman or curl to test the API endpoints.
 
 import sqlite3
+from flask_cors import CORS
 from flask import Flask, request, jsonify
 
 # --- App Setup ---
