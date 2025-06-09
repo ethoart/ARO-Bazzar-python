@@ -16,6 +16,7 @@ from flask import Flask, request, jsonify
 
 # --- App Setup ---
 app = Flask(__name__)
+CORS(app)
 # Provides better JSON error messages
 app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True 
 
