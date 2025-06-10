@@ -213,6 +213,16 @@ def create_category():
 def delete_category(category_id):
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Check if the category exists
+    cursor.execute('SELECT * FROM categories WHERE id = ?', (category_id,))
+    category = cursor.fetchone()
+
+    if category is None:
+        conn.close()
+        return jsonify({"error": "Category not found"}), 404
+
+    # If category exists, delete it
     cursor.execute('DELETE FROM categories WHERE id = ?', (category_id,))
     conn.commit()
     conn.close()
@@ -257,7 +267,18 @@ def update_order_status(order_id):
     
     new_status = data['status']
     conn = get_db_connection()
-    conn.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
+    cursor = conn.cursor()
+
+    # Check if the order exists
+    cursor.execute('SELECT * FROM orders WHERE id = ?', (order_id,))
+    order = cursor.fetchone()
+
+    if order is None:
+        conn.close()
+        return jsonify({"error": "Order not found"}), 404
+
+    # If order exists, update its status
+    cursor.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
     conn.commit()
     conn.close()
     return jsonify({"message": f"Order {order_id} status updated to {new_status}"})
@@ -290,7 +311,7 @@ def get_product(product_id):
     return jsonify(dict(product_cursor)), 200
 
 @app.route('/api/products', methods=['POST'])
-@jwt_required()
+@admin_required()
 def create_product():
     data = request.get_json()
     name = data.get('name')
@@ -315,7 +336,7 @@ def create_product():
     return get_product(new_id)
 
 @app.route('/api/products/<int:product_id>', methods=['PUT'])
-@jwt_required()
+@admin_required()
 def update_product(product_id):
     data = request.get_json()
     if not data:
@@ -339,10 +360,21 @@ def update_product(product_id):
     return get_product(product_id)
 
 @app.route('/api/products/<int:product_id>', methods=['DELETE'])
-@jwt_required()
+@admin_required()
 def delete_product(product_id):
     conn = get_db_connection()
-    conn.execute('DELETE FROM products WHERE id = ?', (product_id,))
+    cursor = conn.cursor()
+
+    # Check if the product exists
+    cursor.execute('SELECT * FROM products WHERE id = ?', (product_id,))
+    product = cursor.fetchone()
+
+    if product is None:
+        conn.close()
+        return jsonify({"error": "Product not found"}), 404
+
+    # If product exists, delete it
+    cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))
     conn.commit()
     conn.close()
     return jsonify({"message": f"Product with ID {product_id} deleted"}), 200
